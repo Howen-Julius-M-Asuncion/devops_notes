@@ -243,6 +243,69 @@ class _NotelistPageState extends State<NotelistPage> {
           ),
         ),
       ),
+      onLongPress: () => _deleteNote(key, context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18,),
+        child: Container(
+          decoration: BoxDecoration(
+            color: CupertinoColors.secondarySystemGroupedBackground,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: [
+              CupertinoListTile.notched(
+                title: Text(
+                  note['title']?.toString() ?? 'Untitled',
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  note['content']?.toString() ?? '',
+                  // _getNotePreview(note['content']),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              const Divider(indent: 25, endIndent: 25, height: 1,),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getNotePreview(List<dynamic> content) {
+    try {
+      return content
+          .map((op) => op['insert']?.toString() ?? '')
+          .join()
+          .replaceAll('\n', ' ')
+          .trim();
+    } catch (e) {
+      return 'Note content';
+    }
+  }
+
+  void _deleteNote(dynamic key, BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Delete Note'),
+        content: Text('Delete "${box.get(key)['title']}"?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Delete'),
+            onPressed: () {
+              box.delete(key); // Delete by key
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 
