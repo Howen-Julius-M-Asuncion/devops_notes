@@ -12,7 +12,7 @@ jobs:
     env:
       # Setup env variables that will be used throughout the workflow
       JAVA_VERSION: 17
-      FLUTTER_VERSION: 3.29.0
+      FLUTTER_VERSION: 3.29.2
       AAB_PATH: build/app/outputs/bundle/release/app-release.aab
       KEYSTORE_PATH: android/app/upload-keystore.jks
       KEY_PROPS_PATH: android/key.properties
