@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:hive_flutter/hive_flutter.dart';
-
+import 'package:notes/main.dart';
 import 'package:notes/pages/notepage.dart';
 
 class NotelistPage extends StatefulWidget {
@@ -13,207 +12,272 @@ class NotelistPage extends StatefulWidget {
 }
 
 class _NotelistPageState extends State<NotelistPage> {
-  List<dynamic> noteList = [];
-  late final Box box;
-
-  @override
-  void initState() {
-    box = Hive.box('database');
-
-    // box.put(
-    //   'Notes', {
-    //     "title" : "Buy on SM",
-    //     "content" : "I want this one though",
-    //     "status" : false,
-    //     "pinned" : false,
-    //   },
-    // );
-    // //
-    // noteList.add({
-    //   "title" : "Buy this one",
-    //   "content" : "No",
-    //   "status" : false,
-    //   "pinned" : false,
-    // });
-
-    // box.delete('Notes');
-    // noteList.add(box.get('Notes'));
-    print(noteList);
-
-
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        automaticallyImplyLeading: false,
-        // middle: Text('Notes', style: TextStyle(color: CupertinoTheme.of(context).primaryColor),), // TO BE REMOVED FOR MORE IOS-ESQUE LOOK
-        trailing: null, // TO BE ADDED FOR MEMBERS INFO BUTTON
-      ),
+      // navigationBar: const CupertinoNavigationBar(
+      //   // middle: Text('Notes'),
+      //   trailing: null,
+      // ),
       child: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
 
             // HEADER
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(left: 25, top: 15),
+                  padding: EdgeInsets.only(left: 25, top: 24),
                   child: Text(
                     'Notes',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
-              child: CupertinoSearchTextField(),
-            ),
-
-            // NOTE LIST
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8,vertical: 12),
-                child:
-                noteList.isEmpty ?
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Text('No notes found')
-                  ],
-                )
-                : ListView.builder(
-                  itemCount: noteList.length,
-                  itemBuilder: (context, int index){
-                    final item = noteList;
-                    return GestureDetector(
-                      onTap: (){
-                        print('Tapped Item $index, Titled: \"${item[index]['title']}\"');
-                        Navigator.push(context, CupertinoPageRoute(builder: (context) => NotePage()));
-                      },
-                      onLongPress: () {
-                        print('LongPressed Item $index, Titled: \"${item[index]['title']}\"');
-                        showCupertinoDialog(
-                          context: context, 
-                          builder: (context) => CupertinoAlertDialog(
-                            title: Text('Delete this note?'),
-                            content: Text('\"${item[index]['title']}\"'),
-                            actions: [
-                              CupertinoDialogAction(
-                                isDefaultAction: true,
-                                onPressed: (){
-                                  Navigator.pop(context);
-                                },
-                                child: Text('No', style: TextStyle(color: CupertinoColors.systemBlue, fontWeight: FontWeight.bold),)
-                              ),
-                              CupertinoDialogAction(
-                                onPressed: (){
-                                  Navigator.pop(context);
-                                  print('Deleted Item $index, Titled: \"${item[index]['title']}\"');
-                                },
-                                child: Text('Yes', style: TextStyle(color: CupertinoColors.destructiveRed,),)
-                              ),
-                            ],  
-                          )
-                        );
-                      },
-
-                      // Note ITEM
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 18,),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.secondarySystemGroupedBackground,
-                            borderRadius: BorderRadius.all(Radius.circular(10))
-                          ),
-                          child: Column(
+                Padding(
+                  padding: EdgeInsets.only(right: 10, top: 26),
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    child: Icon(CupertinoIcons.info_circle, size: 24),
+                    onPressed: () {
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (context) => CupertinoAlertDialog(
+                          title: Text('About Us'),
+                          content: Column(
                             children: [
-                              CupertinoListTile.notched(
-                                leading: CupertinoButton(
-                                  padding: EdgeInsets.zero,
-                                  child: item[index]['pinned'] == true ? Icon(CupertinoIcons.pin_fill) : Icon(CupertinoIcons.pin),
-                                  onPressed: (){
-                                    // PIN LOGIC
-                                    // DISABLED, PIN ONLY ON PAGE
-
-                                    // setState(() {
-                                    //   item[index]['pinned'] = !item[index]['pinned'];
-                                    // });
-                                    // print('Note \"${item[index]['title']}\", Pinnned? ${item[index]['pinned']}');
-                                  },
-                                ),
-                                title: Text(noteList.isNotEmpty ? item[index]['title'] : ''),
-                                subtitle: Text(noteList.isNotEmpty ? item[index]['content'] : ''),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        ClipOval(
+                                          child: Image.asset('assets/images/devs/howen.jpg',
+                                            height: 75,
+                                            width: 75,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Text('Howen Julius Asuncion'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              noteList.isNotEmpty ? Divider(indent: 25,endIndent: 25,height: 2,) : Text('')
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        ClipOval(
+                                          child: Image.asset('assets/images/devs/goco.jpg',
+                                            height: 75,
+                                            width: 75,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Text('John Michael Goco'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        ClipOval(
+                                          child: Image.asset('assets/images/devs/renz.jpg',
+                                            height: 75,
+                                            width: 75,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Text('Renz Gabriel Salas'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
+                          actions: [
+                            CupertinoButton(
+                              child: Text('Close', style: TextStyle(color: CupertinoColors.destructiveRed)),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
                         ),
-                      ),
+                      );
+                    },
+                  ),
+                )
+              ],
+            ),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+            //   child: CupertinoSearchTextField(),
+            // ),
 
-                    );
+            // ITEM LIST
+            SizedBox(height: 10,),
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: box.listenable(),
+                builder: (context, Box box, _) {
+                  final notes = box.keys.toList(); // Get all keys
+
+                  if (notes.isEmpty) {
+                    return _buildEmptyState();
                   }
-                ),
+
+                  return ListView.builder(
+                    itemCount: notes.length,
+                    itemBuilder: (context, index) {
+                      final key = notes[index];
+                      final note = box.get(key); // Get by key
+                      return _buildNoteItem(context, key, note, index);
+                    },
+                  );
+                },
               ),
             ),
 
             // FOOTER
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 4),
-              color: CupertinoColors.systemFill.withOpacity(0.2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(null),
-                  Text(noteList.isEmpty ? '0 Notes' : '${noteList.length} Notes'),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Icon(CupertinoIcons.square_pencil),
-                    onPressed: (){
-                      Navigator.push(context, CupertinoPageRoute(builder: (context) => NotePage()));
-
-                      // showCupertinoDialog(
-                      //   context: context,
-                      //   builder: (context) => CupertinoAlertDialog(
-                      //     title: Text('Create New Note'),
-                      //     content: Text('Are you sure?'),
-                      //     actions: [
-                      //       CupertinoDialogAction(
-                      //         isDefaultAction: true,
-                      //         onPressed: (){
-                      //           Navigator.pop(context);
-                      //         },
-                      //         child: Text('No', style: TextStyle(color: CupertinoColors.systemBlue, fontWeight: FontWeight.bold),)
-                      //       ),
-                      //       CupertinoDialogAction(
-                      //         onPressed: (){
-                      //           // Navigator.pop(context);
-                      //           Navigator.push(context, CupertinoPageRoute(builder: (context) => NotePage()));
-                      //         },
-                      //         child: Text('Yes', style: TextStyle(color: CupertinoColors.destructiveRed,),)
-                      //       ),
-                      //     ],
-                      //   )
-                      //
-                      // );
-
-
-                    }
-                  )
-                ],
-              ),
-            )
-
+            ValueListenableBuilder(
+              valueListenable: box.listenable(),
+              builder: (context, Box box, _) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemFill.withOpacity(0.2),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Icon(null),
+                      Text('${box.length} ${box.length == 1 ? 'Note' : 'Notes'}'),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        child: const Icon(CupertinoIcons.square_pencil),
+                        onPressed: () => Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => const NotePage(),
+                            settings: const RouteSettings(name: '/new-note'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'No notes yet',
+            style: TextStyle(
+              fontSize: 16,
+              color: CupertinoTheme.of(context).textTheme.textStyle.color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoteItem(BuildContext context, dynamic key, Map note, int index) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => NotePage(
+            key: ValueKey(key), // Use key as unique identifier
+            initialData: Map<String, dynamic>.from(note),
+            hiveKey: key, // Pass the Hive key instead of index
+          ),
+        ),
+      ),
+      onLongPress: () => _deleteNote(key, context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18,),
+        child: Container(
+          decoration: BoxDecoration(
+            color: CupertinoColors.secondarySystemGroupedBackground,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: [
+              CupertinoListTile.notched(
+                title: Text(
+                  note['title']?.toString() ?? 'Untitled',
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  note['content']?.toString() ?? '',
+                  // _getNotePreview(note['content']),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              const Divider(indent: 25, endIndent: 25, height: 1,),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getNotePreview(List<dynamic> content) {
+    try {
+      return content
+          .map((op) => op['insert']?.toString() ?? '')
+          .join()
+          .replaceAll('\n', ' ')
+          .trim();
+    } catch (e) {
+      return 'Note content';
+    }
+  }
+
+  void _deleteNote(dynamic key, BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Delete Note'),
+        content: Text('Delete "${box.get(key)['title']}"?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Delete'),
+            onPressed: () {
+              box.delete(key); // Delete by key
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
   }
