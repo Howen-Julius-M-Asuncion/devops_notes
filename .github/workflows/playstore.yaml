@@ -1,4 +1,5 @@
 on:
+  # Run this workflow when any new code is pushed into the main branch
   push:
     tags:
       - "v*"
@@ -11,6 +12,7 @@ jobs:
     env:
       # Setup env variables that will be used throughout the workflow
       JAVA_VERSION: 17
+      FLUTTER_VERSION: 3.29.2
       AAB_PATH: build/app/outputs/bundle/release/app-release.aab
       KEYSTORE_PATH: android/app/upload-keystore.jks
       KEY_PROPS_PATH: android/key.properties
@@ -31,7 +33,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.2"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       # Decode Android env variables
       - name: Decode Android keystore
