@@ -30,7 +30,7 @@ jobs:
 
       # Setup Flutter in the VM
       - name: Setup Flutter
-      - uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.29.0"
           channel: stable
