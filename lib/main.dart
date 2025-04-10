@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:notes/pages/notelist.dart';
-
 import 'package:hive_flutter/hive_flutter.dart';
 
+late Box box;
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  await Hive.openBox('database');
+  box = await Hive.openBox('notes');
 
   runApp(const CupertinoApp(
     debugShowCheckedModeBanner: false,
