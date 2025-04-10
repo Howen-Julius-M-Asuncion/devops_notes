@@ -1,5 +1,4 @@
 on:
-  # Run this workflow when any new code is pushed into the main branch
   push:
     tags:
       - "v*"
