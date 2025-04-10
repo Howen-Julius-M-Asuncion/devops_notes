@@ -33,7 +33,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.29.0"
-          channel: stable
 
       # Decode Android env variables
       - name: Decode Android keystore
@@ -48,9 +47,7 @@ jobs:
 
       # Run flutter commands
       - name: Install dependencies
-        run: |
-          flutter clean
-          flutter pub get
+        run: flutter pub get
 
       # Build Android Bundle release file
       - name: Build aab
