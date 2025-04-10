@@ -4,32 +4,117 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:notes/main.dart';
 
 class NotePage extends StatefulWidget {
-  final int? index;
-  const NotePage({super.key, this.index});
+  final dynamic hiveKey;
+  final Map<String, dynamic>? initialData;
+  const NotePage({
+    super.key,
+    this.hiveKey,
+    this.initialData,
+  });
 
   @override
   State<NotePage> createState() => _NotePageState();
 }
 
 class _NotePageState extends State<NotePage> {
-  List<dynamic> noteData = [];
-
   late final TextEditingController _titleController;
-  late final QuillController _contentController;
-  bool _isPinned = false;
+  late final TextEditingController _contentController;
+
+  // late final QuillController _contentController;
+  bool _isSaving = false;
+  bool _hasChanges = false;
 
   @override
   void initState() {
     super.initState();
     box = Hive.box('notes');
+    _initializeControllers();
+  }
 
-    _titleController = TextEditingController();
-    _contentController = QuillController.basic();
+  void _initializeControllers() {
+    _titleController = TextEditingController(
+        text: widget.initialData?['title'] ?? ''
+    )..addListener(_markChanges);
 
+    _contentController = TextEditingController(
+        text: widget.initialData?['content'] ?? ''
+    )..addListener(_markChanges);
+
+    // _contentController = QuillController(
+    //     document: Document.fromJson(
+    //         widget.initialData?['content'] ?? [{'insert': '\n'}]
+    //     ),
+    //     selection: const TextSelection.collapsed(offset: 0)
+    // )..addListener(_markChanges);
+  }
+
+  void _markChanges() {
+    if (!_hasChanges) {
+      setState(() => _hasChanges = true);
+    }
+  }
+
+  bool _isEmptyNote() {
+    final titleEmpty = _titleController.text.trim().isEmpty;
+    final contentEmpty = _contentController.text.trim().isEmpty;
+    // final contentEmpty = _contentController.document.toPlainText().trim().isEmpty;
+    return titleEmpty && contentEmpty;
+  }
+
+  Future<void> _saveNote() async {
+    if (_isSaving || (!_hasChanges && widget.hiveKey != null)) return;
+    if (_isEmptyNote() && widget.hiveKey == null) return;
+
+    _isSaving = true;
+
+    final note = {
+      'title': _titleController.text,
+      'content': _contentController.text,
+      // 'content': _contentController.document.toDelta().toJson(),
+      'updatedAt': DateTime.now().toString(),
+      'createdAt': widget.initialData?['createdAt'] ?? DateTime.now().toString(),
+    };
+
+    try {
+      if (widget.hiveKey != null) {
+        await box.put(widget.hiveKey, note);
+      } else if (!_isEmptyNote()) {
+        await box.add(note);
+      }
+    } finally {
+      _isSaving = false;
+    }
+  }
+
+
+  void _confirmDelete() {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Delete Note'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Delete'),
+            onPressed: () {
+              if (widget.hiveKey != null) box.delete(widget.hiveKey);
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _titleController.removeListener(_markChanges);
+    _contentController.removeListener(_markChanges);
     _titleController.dispose();
     _contentController.dispose();
     super.dispose();
@@ -40,58 +125,69 @@ class _NotePageState extends State<NotePage> {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Edit Note'),
+        middle: Text(widget.hiveKey == null ? 'New Note' : 'Edit Note'),
         leading: CupertinoNavigationBarBackButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () async {
+            await _saveNote();
+            if (mounted) Navigator.pop(context);
+          },
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Icon(
-                _isPinned ? CupertinoIcons.pin_fill : CupertinoIcons.pin,
-                color: _isPinned ? CupertinoColors.systemOrange : null,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isPinned = !_isPinned;
-                });
-              },
-            ),
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.ellipsis_circle),
-              onPressed: (){},
-            ),
-          ],
-        ),
+        trailing: widget.hiveKey != null ? CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.delete),
+          onPressed: _confirmDelete,
+        ) : null,
       ),
       child: SafeArea(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: CupertinoTextField(
                 controller: _titleController,
                 placeholder: 'Title',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: CupertinoTheme.of(context).textTheme.textStyle.color,
                 ),
                 decoration: null,
               ),
             ),
+
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: QuillEditor.basic(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: CupertinoTextField(
                   controller: _contentController,
-                  scrollController: ScrollController(),
+                  placeholder: 'Start typing...',
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top, // Aligns text to top
+                  padding: const EdgeInsets.only(
+                    left: 0,
+                    right: 0,
+                    top: 8,    // Add some top padding
+                    bottom: 8,  // Add some bottom padding
+                  ),
+                  decoration: null, // Remove default decoration
+                  style: const TextStyle(
+                    fontSize: 16,
+                    height: 1.4, // Adjust line height if needed
+                  ),
                 ),
               ),
             ),
+
+            // Expanded(
+            //   child: Padding(
+            //     padding: const EdgeInsets.symmetric(horizontal: 18),
+            //     child: QuillEditor.basic(
+            //       controller: _contentController,
+            //       scrollController: ScrollController(),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
