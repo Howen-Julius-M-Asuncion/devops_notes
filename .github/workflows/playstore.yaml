@@ -69,9 +69,9 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ env.SERVICE_ACCOUNT_PATH }}
-          packageName: com.hgr.inventory_api
+          packageName: com.hgr.notes
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: alpha
+          track: internal
 
       - name: Cleanup sensitive files
         run: |
